@@ -69,6 +69,18 @@ public:
 			return 0;
 		}
 
+		if (!passwordSignRequirmentsCheck(password)) {				//Sprawdzenie has³a pod k¹tem narzucony wymagañ: 1 cyfra, 1 du¿a litera i 1 znak specjalny
+			std::cout << "Password must contain: 1 uppercase letter, 1 number and 1 special character" << std::endl;
+			system("pause");
+			return 0;
+		}
+
+		if (!passwordLengthRequirmentsCheck(password)) {			//Sprawdzenie has³a pod k¹tem iloœci znaków
+			std::cout << "Password must be at least 8 characters long" << std::endl;
+			system("pause");
+			return 0;
+		}
+
 		User newUser(name, password);								//Stworzenie noweg u¿ytkownika
 
 		_userList.push_back(newUser);								//Dodanie nowego u¿ytkownika do bazy u¿ytkowników
@@ -107,6 +119,43 @@ public:
 		return 0;													//Jeœli nie znaleziono takiej nazwy zwróc false
 	}
 
+	//Sprawdza czy has³o zawiera 1 du¿¹ litere, 1 znak specjalny i 1 cyfre
+	bool passwordSignRequirmentsCheck(std::string password) {
+		bool upperCase{ false };
+		bool number{ false };
+		bool specialCharacter{ false };
+
+		for (char letter : password)
+		{
+			//Sprawdzenie odbywa siê przez zakresy wartoœci znaków ASCII
+			int asciiCode = (int)letter;
+			if ((asciiCode > 32 && asciiCode < 48) || (asciiCode > 57 && asciiCode < 65) || (asciiCode > 90 && asciiCode < 97)) {
+				specialCharacter = true;
+			}
+			else if (asciiCode > 63 && asciiCode < 91) {
+				upperCase = true;
+			}
+			else if (asciiCode > 47 && asciiCode < 58) {
+				number = true;
+			}
+		}
+
+		//Wszystkie warunki musz¹ byæ spe³nione
+		if (upperCase && number && specialCharacter) {
+			return true;
+		}
+
+		return false;
+	}
+	//Sprawdza czy has³o zawiera conajmniej 8 znaków
+	bool passwordLengthRequirmentsCheck(std::string password) {
+		if (password.length() > 7) {
+			return true;
+		}
+		return false;
+	}
+
+	//Metoda wpisuj¹ca do pamiêci loginy i has³a w celu weryfikacji danych przy logowaniu
 	void vectorInitialization(){
 		std::ifstream fileIn("accList.txt");
 		std::string line{};
@@ -127,10 +176,11 @@ public:
 
 		fileIn.close();
 	}
+
 };
 
 //Start menu
-int menu1() {
+int startMenu() {
 	int choice{ 0 };
 	std::cout << std::setw(64);
 	std::cout << "--- SDMS ---" << std::setw(64) << std::endl;
@@ -174,6 +224,8 @@ void createAccMenu(UserContainer& allAcc) {
 
 }
 
+
+
 int main() {
 
 	UserContainer allAcc;										//Dane wszystkich u¿ytkowników. Docelowo inicjalizowane z pliku po ka¿dorazowym odpaleniem programu
@@ -182,22 +234,32 @@ int main() {
 	allAcc.vectorInitialization();
 
 	// Sekcja menu. Trwa tak d³ugo, a¿ u¿ytkownik siê nie zaloguje lub nie wyjdzie z programu
-	while(mainAcc.Logged() == 0)
-	{
-		int choice = menu1();
+	while(mainAcc.Logged() == 0){
+		int choice = startMenu();
 
 		system("CLS");
 
-		if (choice == 1) mainAcc = logInMenu(allAcc);			//Zalogowanie siê
-		else if (choice == 2) createAccMenu(allAcc);			//Rejestracja
-		else return 1;											//Wyjœcie z programu
+		switch(choice) {
+			case 1:
+				mainAcc = logInMenu(allAcc);
+				break;
+
+			case 2:
+				createAccMenu(allAcc);
+				break;
+
+			default:
+				return 1;
+		}
 
 		system("CLS");
 	}
 
+	std::string command;
+
 	//Sekcja sesji. Trwa tak d³ugo, a¿ u¿ytkownik nie wyloguje siê lub nie wyjdzie z programu
 	while (mainAcc.Logged() == 1) {
-
+		
 	}
 
 	return 0;
